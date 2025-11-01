@@ -29,7 +29,7 @@ namespace GiftOfTheGiversFoundation.UnitTests.Services
 
             // Act & Assert
             await emailService.SendEmailAsync("recipient@test.com", "Test Subject", "Test Message");
-            Assert.IsTrue(true); // If we reach here, no exception was thrown
+            Assert.IsTrue(true);
         }
     }
 }

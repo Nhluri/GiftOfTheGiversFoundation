@@ -1,0 +1,716 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Manage Schedules";
+    var volunteers = ViewBag.Volunteers as List<User>;
+    var schedules = ViewBag.Schedules as List<VolunteerSchedule>;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --info: #4cc9f0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e63946;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .schedules-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .schedules-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .schedules-header {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .header-text p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .schedules-body {
+            padding: 40px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+            .back-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            }
+
+        /* Alert Styles */
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        /* Card Styles */
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+            .card-custom:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px 25px;
+            border: none;
+        }
+
+            .card-header-custom h5 {
+                margin: 0;
+                font-weight: 600;
+            }
+
+        .card-body-custom {
+            padding: 25px;
+        }
+
+        /* Form Styles */
+        .form-group-custom {
+            margin-bottom: 20px;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control-custom {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            height: 45px;
+        }
+
+            .form-control-custom:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+            }
+
+        .btn-add-schedule {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            justify-content: center;
+        }
+
+            .btn-add-schedule:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 20px rgba(76, 201, 240, 0.4);
+                color: white;
+            }
+
+        /* Schedule List Styles */
+        .schedule-item {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--info);
+            transition: all 0.3s ease;
+        }
+
+            .schedule-item:hover {
+                background: white;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .schedule-volunteer {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .schedule-details {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .schedule-assignment {
+            color: #495057;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .badge-custom {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-scheduled {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .status-in-progress {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .schedule-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-select {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: white;
+            flex: 1;
+        }
+
+        .btn-delete-schedule {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+            .btn-delete-schedule:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+            }
+
+        /* Volunteer List Styles */
+        .volunteer-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--light);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--success);
+        }
+
+            .volunteer-item:hover {
+                background: white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+        .volunteer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+            .volunteer-avatar i {
+                color: white;
+                font-size: 1.2rem;
+            }
+
+        .volunteer-info h6 {
+            margin: 0 0 2px 0;
+            font-weight: 600;
+        }
+
+        .volunteer-info small {
+            color: #6c757d;
+        }
+
+        .availability-badge {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Calendar Preview */
+        .calendar-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-month {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 8px 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6c757d;
+        }
+
+        .calendar-date {
+            text-align: center;
+            padding: 8px 5px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .calendar-date.has-schedule {
+                background: var(--info);
+                color: white;
+                font-weight: 600;
+            }
+
+            .calendar-date.today {
+                background: var(--primary);
+                color: white;
+                font-weight: 600;
+            }
+
+            .calendar-date:hover {
+                background: var(--light);
+            }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="schedules-container">
+        <!-- Back Button -->
+        <a href="/Admin/Dashboard" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <div class="schedules-card">
+            <!-- Header Section -->
+            <div class="schedules-header">
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1><i class="fas fa-calendar-alt me-2"></i>Manage Volunteer Schedules</h1>
+                        <p>Coordinate volunteer schedules and assignments efficiently</p>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">@(volunteers?.Count ?? 0)</span>
+                            <span class="stat-label">Volunteers</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@(schedules?.Count ?? 0)</span>
+                            <span class="stat-label">Schedules</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@(schedules?.Count(s => s.Status == "Completed") ?? 0)</span>
+                            <span class="stat-label">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Section -->
+            <div class="schedules-body">
+                <!-- Success/Error Messages -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-custom">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="row">
+                    <!-- Left Column - Schedules List -->
+                    <div class="col-lg-8">
+                        <div class="card card-custom">
+                            <div class="card-header-custom d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-list me-2"></i>Upcoming Schedules</h5>
+                                <span class="badge-custom status-scheduled">@(schedules?.Count ?? 0) scheduled</span>
+                            </div>
+                            <div class="card-body-custom">
+                                @if (schedules != null && schedules.Any())
+                                {
+                                    <div>
+                                        @foreach (var schedule in schedules)
+                                        {
+                                            <div class="schedule-item">
+                                                <div class="schedule-header">
+                                                    <h6 class="schedule-volunteer">
+                                                        <i class="fas fa-user me-2"></i>@schedule.Volunteer?.FullName
+                                                    </h6>
+                                                    <span class="badge-custom @($"status-{schedule.Status?.ToLower().Replace(" ", "-")}")">
+                                                        @schedule.Status
+                                                    </span>
+                                                </div>
+                                                <div class="schedule-details">
+                                                    <div><i class="fas fa-calendar me-2"></i><strong>Date:</strong> @schedule.ShiftDate.ToString("MMM dd, yyyy")</div>
+                                                    <div><i class="fas fa-clock me-2"></i><strong>Time:</strong> @schedule.StartTime.ToString(@"hh\:mm") - @schedule.EndTime.ToString(@"hh\:mm")</div>
+                                                </div>
+                                                <div class="schedule-assignment">
+                                                    <i class="fas fa-tasks me-2"></i>@schedule.Assignment
+                                                </div>
+                                                <div class="schedule-actions">
+                                                    <form asp-action="UpdateScheduleStatus" method="post" class="flex-grow-1">
+                                                        <input type="hidden" name="scheduleId" value="@schedule.ScheduleId" />
+                                                        <select name="status" onchange="this.form.submit()" class="status-select">
+                                                            <option value="Scheduled" selected="@(schedule.Status == "Scheduled")">Scheduled</option>
+                                                            <option value="In Progress" selected="@(schedule.Status == "In Progress")">In Progress</option>
+                                                            <option value="Completed" selected="@(schedule.Status == "Completed")">Completed</option>
+                                                            <option value="Cancelled" selected="@(schedule.Status == "Cancelled")">Cancelled</option>
+                                                        </select>
+                                                    </form>
+                                                    <form asp-action="DeleteSchedule" method="post"
+                                                          onsubmit="return confirm('Are you sure you want to delete this schedule?');">
+                                                        <input type="hidden" name="scheduleId" value="@schedule.ScheduleId" />
+                                                        <button type="submit" class="btn-delete-schedule">
+                                                            <i class="fas fa-trash me-1"></i> Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-calendar-times"></i>
+                                        </div>
+                                        <h5>No Upcoming Schedules</h5>
+                                        <p>Start by adding a schedule for your volunteers.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Forms and Info -->
+                    <div class="col-lg-4">
+                        <!-- Add Schedule Form -->
+                        <div class="card card-custom">
+                            <div class="card-header-custom">
+                                <h5><i class="fas fa-plus-circle me-2"></i>Add New Schedule</h5>
+                            </div>
+                            <div class="card-body-custom">
+                                <form asp-action="AddSchedule" method="post">
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" for="volunteerId">Volunteer</label>
+                                        <select class="form-control form-control-custom" id="volunteerId" name="volunteerId" required>
+                                            <option value="">-- Select Volunteer --</option>
+                                            @if (volunteers != null && volunteers.Any())
+                                            {
+                                                foreach (var volunteer in volunteers)
+                                                {
+                                                    <option value="@volunteer.UserID">@volunteer.FullName</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <option value="">No volunteers available</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" for="shiftDate">Date</label>
+                                        <input type="date" class="form-control form-control-custom" id="shiftDate" name="shiftDate" required
+                                               min="@DateTime.Today.ToString("yyyy-MM-dd")">
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group-custom">
+                                                <label class="form-label-custom" for="startTime">Start Time</label>
+                                                <input type="time" class="form-control form-control-custom" id="startTime" name="startTime" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group-custom">
+                                                <label class="form-label-custom" for="endTime">End Time</label>
+                                                <input type="time" class="form-control form-control-custom" id="endTime" name="endTime" required>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" for="assignment">Assignment</label>
+                                        <input type="text" class="form-control form-control-custom" id="assignment" name="assignment" placeholder="Enter assignment description" required>
+                                    </div>
+
+                                    <button type="submit" class="btn-add-schedule">
+                                        <i class="fas fa-calendar-plus me-2"></i> Add Schedule
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Available Volunteers -->
+                        <div class="card card-custom">
+                            <div class="card-header-custom">
+                                <h5><i class="fas fa-users me-2"></i>Available Volunteers (@(volunteers?.Count ?? 0))</h5>
+                            </div>
+                            <div class="card-body-custom">
+                                @if (volunteers != null && volunteers.Any())
+                                {
+                                    <div>
+                                        @foreach (var volunteer in volunteers)
+                                        {
+                                            <div class="volunteer-item">
+                                                <div class="volunteer-avatar">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <div class="volunteer-info">
+                                                    <h6>@volunteer.FullName</h6>
+                                                    <small>@volunteer.Email</small>
+                                                </div>
+                                                <span class="availability-badge">Available</span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-users-slash"></i>
+                                        </div>
+                                        <p>No volunteers registered in the system.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Set minimum date for shift date to today
+            const today = new Date().toISOString().split('T')[0];
+            $('#shiftDate').attr('min', today);
+
+            // Add hover effects
+            $('.card-custom').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-2px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+
+            // Auto-submit confirmation for status changes
+            $('select[name="status"]').on('change', function() {
+                const newStatus = $(this).val();
+                const volunteerName = $(this).closest('.schedule-item').find('.schedule-volunteer').text();
+
+                if (confirm(`Change status of ${volunteerName}'s schedule to "${newStatus}"?`)) {
+                    $(this).closest('form').submit();
+                } else {
+                    $(this).val($(this).data('previous-value'));
+                }
+            });
+
+            // Store previous value on focus
+            $('select[name="status"]').on('focus', function() {
+                $(this).data('previous-value', $(this).val());
+            });
+
+            // Time validation
+            $('#startTime, #endTime').on('change', function() {
+                const startTime = $('#startTime').val();
+                const endTime = $('#endTime').val();
+
+                if (startTime && endTime && startTime >= endTime) {
+                    alert('End time must be after start time');
+                    $('#endTime').val('');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

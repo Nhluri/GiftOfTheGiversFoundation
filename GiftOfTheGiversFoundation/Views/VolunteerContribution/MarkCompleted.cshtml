@@ -1,0 +1,45 @@
+﻿@model GiftOfTheGiversFoundation.Models.VolunteerContribution
+@{
+    ViewData["Title"] = "Mark Task Completed";
+}
+
+<h2>Mark Task as Completed</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="MarkCompleted" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.ContributionID" />
+
+            <div class="form-group mb-3">
+                <label class="control-label font-weight-bold">Task</label>
+                <p class="form-control-plaintext">
+                    @if (Model.Task != null)
+                    {
+                        @Model.Task.Title
+                    }
+                    else
+                    {
+                        @Model.Description
+                    }
+                </p>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="hoursWorked" class="control-label font-weight-bold">Hours Worked</label>
+                <input type="number" name="hoursWorked" class="form-control" step="0.5" min="0.5" max="24" required />
+                <small class="form-text text-muted">Enter the number of hours you worked</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="workDescription" class="control-label font-weight-bold">Work Description</label>
+                <textarea name="workDescription" class="form-control" rows="3" placeholder="What did you accomplish?">@Model.Description</textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-success">Mark as Completed</button>
+                <a asp-action="MyContributions" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

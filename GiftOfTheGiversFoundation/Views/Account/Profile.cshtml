@@ -1,0 +1,460 @@
+﻿@model GiftOfTheGiversFoundation.ViewModels.ProfileViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Profile";
+
+    // Dynamic Dashboard URL Logic
+    string dashboardUrl = "/Home";
+    if (User.Identity.IsAuthenticated)
+    {
+        if (User.IsInRole("Admin"))
+        {
+            dashboardUrl = "/Admin/Dashboard";
+        }
+        else if (User.IsInRole("Volunteer"))
+        {
+            dashboardUrl = "/Volunteer/Dashboard";
+        }
+        else
+        {
+            dashboardUrl = "/User/Dashboard";
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #e63946;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px 30px 30px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 4px solid white;
+        }
+
+            .profile-avatar i {
+                font-size: 50px;
+                color: white;
+            }
+
+        .profile-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+
+        .profile-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .profile-body {
+            padding: 40px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+            .back-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            }
+
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, var(--success) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        .form-group-custom {
+            margin-bottom: 25px;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: #6c757d;
+            z-index: 3;
+        }
+
+        .form-control-custom {
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            height: 50px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+            .form-control-custom:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+            }
+
+            .form-control-custom[readonly] {
+                background-color: #f8f9fa;
+                color: #6c757d;
+            }
+
+        .validation-message {
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+            color: var(--danger);
+            font-weight: 500;
+        }
+
+        .form-text-custom {
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: block;
+            color: #6c757d;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+            .btn-update:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 20px rgba(67, 97, 238, 0.4);
+            }
+
+        .user-role-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            background: var(--light);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .user-name-display {
+            transition: all 0.3s ease;
+        }
+
+        .updated-highlight {
+            animation: highlightUpdate 2s ease-in-out;
+        }
+
+        @@keyframes highlightUpdate {
+            0% {
+                background-color: rgba(76, 201, 240, 0.3);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <a href="@dashboardUrl" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+            @if (User.Identity.IsAuthenticated)
+            {
+                <span class="user-role-badge">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <text>Admin</text>
+                    }
+                    else if (User.IsInRole("Volunteer"))
+                    {
+                        <text>Volunteer</text>
+                    }
+                    else
+                    {
+                        <text>User</text>
+                    }
+                </span>
+            }
+        </a>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <h2 class="user-name-display" id="userNameDisplay">My Profile</h2>
+                <p>Manage your account information</p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <small class="d-block mt-2">
+                        Logged in as: <strong id="currentUserName">@User.Identity.Name</strong>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <span class="badge bg-warning ms-2">Administrator</span>
+                        }
+                        else if (User.IsInRole("Volunteer"))
+                        {
+                            <span class="badge bg-info ms-2">Volunteer</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary ms-2">User</span>
+                        }
+                    </small>
+                }
+            </div>
+
+            <div class="profile-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-custom" id="successAlert">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-triangle me-2"></i> @TempData["Error"]
+                    </div>
+                }
+
+                <form asp-action="Profile" method="post" id="profileForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom" asp-for="FullName">Full Name</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-user input-icon"></i>
+                            <input asp-for="FullName" class="form-control-custom" placeholder="Enter your full name" id="fullNameInput" />
+                        </div>
+                        <span asp-validation-for="FullName" class="validation-message"></span>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom" asp-for="Email">Email Address</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input asp-for="Email" class="form-control-custom" readonly placeholder="Your email address" />
+                        </div>
+                        <small class="form-text text-muted form-text-custom">
+                            <i class="fas fa-info-circle me-1"></i> Email cannot be changed
+                        </small>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom" asp-for="PhoneNumber">Phone Number</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-phone input-icon"></i>
+                            <input asp-for="PhoneNumber" class="form-control-custom" placeholder="Enter your phone number" id="phoneNumberInput" />
+                        </div>
+                        <span asp-validation-for="PhoneNumber" class="validation-message"></span>
+                    </div>
+
+                    <button type="submit" class="btn-update" id="updateButton">
+                        <i class="fas fa-save me-2"></i> Update Profile
+                    </button>
+                </form>
+
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">@DateTime.Now.ToString("MMM yyyy")</span>
+                        <span class="stat-label">Member Since</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <text>Admin</text>
+                            }
+                            else if (User.IsInRole("Volunteer"))
+                            {
+                                <text>Volunteer</text>
+                            }
+                            else
+                            {
+                                <text>User</text>
+                            }
+                        </span>
+                        <span class="stat-label">Role</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">Active</span>
+                        <span class="stat-label">Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut(500, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Phone number formatting
+            $('input[name="PhoneNumber"]').on('input', function() {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value.length > 0) {
+                    value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+                }
+                $(this).val(value);
+            });
+
+            // Form submission handling
+            $('#profileForm').on('submit', function() {
+                $('#updateButton').html('<i class="fas fa-spinner fa-spin me-2"></i> Updating...');
+                $('#updateButton').prop('disabled', true);
+            });
+
+            // Update user name display immediately after successful update
+            $('#fullNameInput').on('change', function() {
+                const newName = $(this).val().trim();
+                if (newName) {
+                    $('#currentUserName').text(newName);
+                    $('#userNameDisplay').addClass('updated-highlight');
+                    setTimeout(() => {
+                        $('#userNameDisplay').removeClass('updated-highlight');
+                    }, 2000);
+                }
+            });
+
+            // If there's a success message, highlight the updated fields
+            if ($('#successAlert').length > 0) {
+                $('#fullNameInput').addClass('updated-highlight');
+                $('#phoneNumberInput').addClass('updated-highlight');
+                setTimeout(() => {
+                    $('#fullNameInput').removeClass('updated-highlight');
+                    $('#phoneNumberInput').removeClass('updated-highlight');
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

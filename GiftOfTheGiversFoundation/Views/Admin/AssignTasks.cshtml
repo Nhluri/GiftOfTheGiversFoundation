@@ -1,0 +1,686 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Assign Tasks";
+    var volunteers = ViewBag.Volunteers as List<User>;
+    var activeTasks = ViewBag.ActiveTasks as List<TaskAssignment>;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --danger: #e63946;
+            --info: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .tasks-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .tasks-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .tasks-header {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .header-text p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tasks-body {
+            padding: 40px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+            .back-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            }
+
+        /* Alert Styles */
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        /* Card Styles */
+        .card-custom {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+            .card-custom:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            }
+
+        .card-header-custom {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px 25px;
+            border: none;
+        }
+
+            .card-header-custom h5 {
+                margin: 0;
+                font-weight: 600;
+            }
+
+        .card-body-custom {
+            padding: 25px;
+        }
+
+        /* Form Styles */
+        .form-group-custom {
+            margin-bottom: 20px;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control-custom {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            height: 45px;
+        }
+
+            .form-control-custom:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+            }
+
+        textarea.form-control-custom {
+            height: auto;
+            resize: vertical;
+        }
+
+        .btn-assign {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .btn-assign:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 20px rgba(245, 158, 11, 0.4);
+                color: white;
+            }
+
+        /* Volunteer List Styles */
+        .volunteer-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            background: var(--light);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--success);
+        }
+
+            .volunteer-item:hover {
+                background: white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+        .volunteer-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+            .volunteer-avatar i {
+                color: white;
+                font-size: 1.2rem;
+            }
+
+        .volunteer-info h6 {
+            margin: 0 0 2px 0;
+            font-weight: 600;
+        }
+
+        .volunteer-info small {
+            color: #6c757d;
+        }
+
+        /* Task List Styles */
+        .task-item {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--warning);
+            transition: all 0.3s ease;
+        }
+
+            .task-item:hover {
+                background: white;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .task-meta {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .task-description {
+            color: #495057;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .badge-custom {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-urgent {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        .priority-high {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .priority-medium {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .priority-low {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .status-assigned {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .status-in-progress {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .status-cancelled {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-select {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        .btn-delete-task {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+            .btn-delete-task:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+            }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+
+        {
+            padding: 10px;
+        }
+
+        .tasks-body {
+            padding: 20px 15px;
+        }
+
+        .header-text h1 {
+            font-size: 2rem;
+        }
+
+        .volunteer-item {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .volunteer-avatar {
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="tasks-container">
+        <!-- Back Button -->
+        <a href="/Admin/Dashboard" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <div class="tasks-card">
+            <!-- Header Section -->
+            <div class="tasks-header">
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1><i class="fas fa-tasks me-2"></i>Assign Volunteer Tasks</h1>
+                        <p>Manage and assign tasks to volunteers efficiently</p>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">@(volunteers?.Count ?? 0)</span>
+                            <span class="stat-label">Volunteers</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@(activeTasks?.Count ?? 0)</span>
+                            <span class="stat-label">Active Tasks</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@(activeTasks?.Count(t => t.Status == "Completed") ?? 0)</span>
+                            <span class="stat-label">Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Section -->
+            <div class="tasks-body">
+                <!-- Success/Error Messages -->
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-custom">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-custom">
+                        <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <div class="row">
+                    <!-- Assign Task Form -->
+                    <div class="col-lg-8">
+                        <div class="card card-custom">
+                            <div class="card-header-custom">
+                                <h5><i class="fas fa-plus-circle me-2"></i>Assign New Task</h5>
+                            </div>
+                            <div class="card-body-custom">
+                                <form asp-action="AssignTask" method="post">
+                                    @Html.AntiForgeryToken()
+
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" for="volunteerId">Select Volunteer</label>
+                                        <select class="form-control form-control-custom" id="volunteerId" name="volunteerId" required>
+                                            <option value="">-- Select Volunteer --</option>
+                                            @if (volunteers != null && volunteers.Any())
+                                            {
+                                                foreach (var volunteer in volunteers)
+                                                {
+                                                    <option value="@volunteer.UserID">@volunteer.FullName (@volunteer.Email)</option>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <option value="">No volunteers available</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" for="taskTitle">Task Title</label>
+                                        <input type="text" class="form-control form-control-custom" id="taskTitle" name="taskTitle" placeholder="Enter task title" required>
+                                    </div>
+
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" for="taskDescription">Task Description</label>
+                                        <textarea class="form-control form-control-custom" id="taskDescription" name="taskDescription" rows="4" placeholder="Enter task details" required></textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group-custom">
+                                                <label class="form-label-custom" for="dueDate">Due Date</label>
+                                                <input type="date" class="form-control form-control-custom" id="dueDate" name="dueDate" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group-custom">
+                                                <label class="form-label-custom" for="priority">Priority</label>
+                                                <select class="form-control form-control-custom" id="priority" name="priority" required>
+                                                    <option value="Low">Low</option>
+                                                    <option value="Medium" selected>Medium</option>
+                                                    <option value="High">High</option>
+                                                    <option value="Urgent">Urgent</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-assign">
+                                        <i class="fas fa-paper-plane me-2"></i> Assign Task
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <div class="col-lg-4">
+                        <!-- Available Volunteers -->
+                        <div class="card card-custom">
+                            <div class="card-header-custom">
+                                <h5><i class="fas fa-users me-2"></i>Available Volunteers (@(volunteers?.Count ?? 0))</h5>
+                            </div>
+                            <div class="card-body-custom">
+                                @if (volunteers != null && volunteers.Any())
+                                {
+                                    <div>
+                                        @foreach (var volunteer in volunteers)
+                                        {
+                                            <div class="volunteer-item">
+                                                <div class="volunteer-avatar">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                                <div class="volunteer-info">
+                                                    <h6>@volunteer.FullName</h6>
+                                                    <small>@volunteer.Email</small>
+                                                    @if (!string.IsNullOrEmpty(volunteer.PhoneNumber))
+                                                    {
+                                                        <br>
+                                                        <small>@volunteer.PhoneNumber</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-users-slash"></i>
+                                        </div>
+                                        <p>No volunteers registered in the system.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Active Tasks -->
+                        <div class="card card-custom">
+                            <div class="card-header-custom d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-list-alt me-2"></i>Active Tasks (@(activeTasks?.Count ?? 0))</h5>
+                            </div>
+                            <div class="card-body-custom">
+                                @if (activeTasks != null && activeTasks.Any())
+                                {
+                                    <div>
+                                        @foreach (var task in activeTasks)
+                                        {
+                                            <div class="task-item">
+                                                <div class="task-header">
+                                                    <h6 class="task-title">@task.TaskTitle</h6>
+                                                    <div>
+                                                        <span class="badge-custom @($"priority-{task.Priority?.ToLower()}")">
+                                                            @task.Priority
+                                                        </span>
+                                                        <span class="badge-custom @($"status-{task.Status?.ToLower().Replace(" ", "-")}") ml-1">
+                                                            @task.Status
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="task-meta">
+                                                    <small><i class="fas fa-user me-1"></i>@task.Volunteer?.FullName</small><br>
+                                                    <small><i class="fas fa-calendar me-1"></i>Due: @task.DueDate.ToString("MMM dd, yyyy")</small>
+                                                </div>
+                                                <div class="task-description">
+                                                    @task.TaskDescription
+                                                </div>
+                                                <div class="task-actions">
+                                                    <form asp-action="UpdateTaskStatus" method="post" class="flex-grow-1">
+                                                        <input type="hidden" name="taskId" value="@task.TaskID" />
+                                                        <select name="status" onchange="this.form.submit()" class="status-select">
+                                                            <option value="Assigned" selected="@(task.Status == "Assigned")">Assigned</option>
+                                                            <option value="In Progress" selected="@(task.Status == "In Progress")">In Progress</option>
+                                                            <option value="Completed" selected="@(task.Status == "Completed")">Completed</option>
+                                                            <option value="Cancelled" selected="@(task.Status == "Cancelled")">Cancelled</option>
+                                                        </select>
+                                                    </form>
+                                                    <form asp-action="DeleteTask" method="post"
+                                                          onsubmit="return confirm('Are you sure you want to delete this task?');">
+                                                        <input type="hidden" name="taskId" value="@task.TaskID" />
+                                                        <button type="submit" class="btn-delete-task">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                        <p>No active tasks assigned.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Set minimum date for due date to today
+            const today = new Date().toISOString().split('T')[0];
+            $('#dueDate').attr('min', today);
+
+            // Add hover effects
+            $('.card-custom').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-2px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+
+            // Auto-submit confirmation for status changes
+            $('select[name="status"]').on('change', function() {
+                const newStatus = $(this).val();
+                const taskTitle = $(this).closest('.task-item').find('.task-title').text();
+
+                if (confirm(`Change status of "${taskTitle}" to "${newStatus}"?`)) {
+                    $(this).closest('form').submit();
+                } else {
+                    $(this).val($(this).data('previous-value'));
+                }
+            });
+
+            // Store previous value on focus
+            $('select[name="status"]').on('focus', function() {
+                $(this).data('previous-value', $(this).val());
+            });
+        });
+    </script>
+</body>
+</html>

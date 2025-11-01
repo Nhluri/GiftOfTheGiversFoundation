@@ -1,0 +1,524 @@
+﻿@model GiftOfTheGiversFoundation.Models.Incident
+@{
+    Layout = null;
+    ViewData["Title"] = "Report Incident";
+
+    // Dynamic Dashboard URL Logic
+    string dashboardUrl = "/Home";
+    if (User.Identity.IsAuthenticated)
+    {
+        if (User.IsInRole("Admin"))
+        {
+            dashboardUrl = "/Admin/Dashboard";
+        }
+        else if (User.IsInRole("Volunteer"))
+        {
+            dashboardUrl = "/Volunteer/Dashboard";
+        }
+        else
+        {
+            dashboardUrl = "/User/Dashboard";
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --danger: #e63946;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --info: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .incident-container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .incident-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .incident-header {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .incident-header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+
+        .incident-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .incident-body {
+            padding: 40px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+            .back-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            }
+
+        /* Form Styles */
+        .form-container {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .form-group-custom {
+            margin-bottom: 25px;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .form-control-custom {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+            .form-control-custom:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+            }
+
+        textarea.form-control-custom {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        select.form-control-custom {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+        }
+
+        .validation-message {
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+            color: var(--danger);
+            font-weight: 500;
+        }
+
+        .validation-summary {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+
+            .validation-summary ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+        /* Button Styles */
+        .btn-report {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #6c757d;
+            border: 2px solid #6c757d;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(230, 57, 70, 0.4);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .section-title i {
+                color: var(--danger);
+            }
+
+        /* Emergency Level Indicators */
+        .severity-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .severity-option {
+            text-align: center;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .severity-option:hover {
+                border-color: var(--primary);
+                transform: translateY(-2px);
+            }
+
+            .severity-option.active {
+                border-color: var(--danger);
+                background: var(--light);
+            }
+
+        .severity-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .severity-low {
+            color: var(--success);
+        }
+
+        .severity-medium {
+            color: var(--warning);
+        }
+
+        .severity-high {
+            color: var(--danger);
+        }
+
+        .severity-critical {
+            color: #dc2626;
+        }
+
+        /* User Role Badge */
+        .user-role-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="incident-container">
+        <!-- Back Button -->
+        <a href="@dashboardUrl" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+            @if (User.Identity.IsAuthenticated)
+            {
+                <span class="user-role-badge">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <text>Admin</text>
+                    }
+                    else if (User.IsInRole("Volunteer"))
+                    {
+                        <text>Volunteer</text>
+                    }
+                    else
+                    {
+                        <text>User</text>
+                    }
+                </span>
+            }
+        </a>
+
+        <div class="incident-card">
+            <!-- Header Section -->
+            <div class="incident-header">
+                <div class="header-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h1>Report New Incident</h1>
+                <p>Help us respond quickly by providing accurate incident details</p>
+            </div>
+
+            <!-- Body Section -->
+            <div class="incident-body">
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-container">
+                    <form asp-action="Create">
+                        <!-- Basic Information Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Basic Information</span>
+                            </div>
+
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="Title">Incident Title</label>
+                                <input asp-for="Title" class="form-control-custom" placeholder="Enter a clear, descriptive title for the incident" />
+                                <span asp-validation-for="Title" class="validation-message"></span>
+                            </div>
+
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="Description">Incident Description</label>
+                                <textarea asp-for="Description" class="form-control-custom" rows="4" placeholder="Provide detailed information about what happened, current situation, and any immediate dangers"></textarea>
+                                <span asp-validation-for="Description" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Incident Details Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Incident Details</span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" asp-for="IncidentType">Incident Type</label>
+                                        <select asp-for="IncidentType" class="form-control-custom">
+                                            <option value="">Select Incident Type</option>
+                                            <option value="Flood">Flood</option>
+                                            <option value="Fire">Fire</option>
+                                            <option value="Earthquake">Earthquake</option>
+                                            <option value="Storm">Storm</option>
+                                            <option value="Medical Emergency">Medical Emergency</option>
+                                            <option value="Building Collapse">Building Collapse</option>
+                                            <option value="Transport Accident">Transport Accident</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                        <span asp-validation-for="IncidentType" class="validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" asp-for="Severity">Severity Level</label>
+                                        <select asp-for="Severity" class="form-control-custom" id="severitySelect">
+                                            <option value="">Select Severity Level</option>
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                            <option value="Critical">Critical</option>
+                                        </select>
+                                        <div class="severity-options">
+                                            <div class="severity-option" data-value="Low">
+                                                <div class="severity-label severity-low">Low</div>
+                                                <small>Minor impact</small>
+                                            </div>
+                                            <div class="severity-option" data-value="Medium">
+                                                <div class="severity-label severity-medium">Medium</div>
+                                                <small>Localized impact</small>
+                                            </div>
+                                            <div class="severity-option" data-value="High">
+                                                <div class="severity-label severity-high">High</div>
+                                                <small>Significant impact</small>
+                                            </div>
+                                            <div class="severity-option" data-value="Critical">
+                                                <div class="severity-label severity-critical">Critical</div>
+                                                <small>Emergency situation</small>
+                                            </div>
+                                        </div>
+                                        <span asp-validation-for="Severity" class="validation-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="Location">Location</label>
+                                <input asp-for="Location" class="form-control-custom" placeholder="Enter exact location, address, or coordinates" />
+                                <span asp-validation-for="Location" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Impact Assessment Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Impact Assessment</span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" asp-for="IncidentDate">Incident Date & Time</label>
+                                        <input asp-for="IncidentDate" class="form-control-custom" type="datetime-local" />
+                                        <span asp-validation-for="IncidentDate" class="validation-message"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-custom">
+                                        <label class="form-label-custom" asp-for="PeopleAffected">Estimated People Affected</label>
+                                        <input asp-for="PeopleAffected" class="form-control-custom" placeholder="Enter estimated number" type="number" min="0" />
+                                        <span asp-validation-for="PeopleAffected" class="validation-message"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="EmergencyNeeds">Emergency Needs</label>
+                                <input asp-for="EmergencyNeeds" class="form-control-custom" placeholder="Food, Shelter, Medical Aid, Water, Clothing, etc." />
+                                <small class="form-text text-muted">List the most urgent needs separated by commas</small>
+                                <span asp-validation-for="EmergencyNeeds" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-group-custom text-center">
+                            <button type="submit" class="btn-report">
+                                <i class="fas fa-paper-plane me-2"></i> Report Incident
+                            </button>
+                            <a asp-action="Index" class="btn-cancel">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Set current date and time as default
+            const now = new Date();
+            const localDateTime = now.toISOString().slice(0, 16);
+            $('input[name="IncidentDate"]').val(localDateTime);
+
+            // Severity option selection
+            $('.severity-option').on('click', function() {
+                const severity = $(this).data('value');
+                $('#severitySelect').val(severity);
+                $('.severity-option').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Update severity options when select changes
+            $('#severitySelect').on('change', function() {
+                const severity = $(this).val();
+                $('.severity-option').removeClass('active');
+                $(`.severity-option[data-value="${severity}"]`).addClass('active');
+            });
+
+            // Form submission loading state
+            $('form').on('submit', function() {
+                $('.btn-report').html('<i class="fas fa-spinner fa-spin me-2"></i> Reporting...');
+                $('.btn-report').prop('disabled', true);
+                $('.btn-cancel').prop('disabled', true);
+            });
+
+            // Auto-capitalize first letter of title
+            $('input[name="Title"]').on('blur', function() {
+                const value = $(this).val();
+                if (value && value.length > 0) {
+                    $(this).val(value.charAt(0).toUpperCase() + value.slice(1));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

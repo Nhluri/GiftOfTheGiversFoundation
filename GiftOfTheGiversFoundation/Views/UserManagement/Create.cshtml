@@ -1,0 +1,487 @@
+﻿@model GiftOfTheGiversFoundation.Models.User
+@{
+    Layout = null; // This completely removes layout dependency
+    ViewData["Title"] = "Create User";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #e63946;
+            --warning: #f59e0b;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .create-container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .create-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .create-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .create-header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+
+        .create-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .create-body {
+            padding: 40px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+            .back-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            }
+
+        /* Form Styles */
+        .form-container {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .form-group-custom {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: #6c757d;
+            z-index: 3;
+        }
+
+        .form-control-custom {
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            height: 50px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+            .form-control-custom:focus {
+                border-color: var(--primary);
+                box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+            }
+
+            .form-control-custom.select-custom {
+                padding-left: 45px;
+                appearance: none;
+                background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+                background-position: right 12px center;
+                background-repeat: no-repeat;
+                background-size: 16px;
+            }
+
+        .validation-message {
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+            color: var(--danger);
+            font-weight: 500;
+        }
+
+        .validation-summary {
+            background: linear-gradient(135deg, var(--danger) 0%, #f72585 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+        }
+
+            .validation-summary ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+        .btn-create {
+            background: linear-gradient(135deg, var(--success) 0%, #4895ef 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+            .btn-create:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 20px rgba(76, 201, 240, 0.4);
+            }
+
+        /* Form Sections */
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .section-title i {
+                color: var(--primary);
+            }
+
+        /* Password Strength */
+        .password-strength {
+            margin-top: 10px;
+        }
+
+        .strength-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .strength-weak {
+            background: var(--danger);
+            width: 33%;
+        }
+
+        .strength-medium {
+            background: var(--warning);
+            width: 66%;
+        }
+
+        .strength-strong {
+            background: #22c55e;
+            width: 100%;
+        }
+
+        .strength-text {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        /* Responsive Design */
+
+        /* Role Badges Preview */
+        .role-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .role-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+            .role-badge:hover {
+                transform: translateY(-2px);
+            }
+
+            .role-badge.active {
+                border-color: var(--dark);
+            }
+
+        .role-admin {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .role-volunteer {
+            background: linear-gradient(135deg, var(--success) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .role-user {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="create-container">
+        <!-- Back Button -->
+        <a href="/UserManagement/Index" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
+
+        <div class="create-card">
+            <!-- Header Section -->
+            <div class="create-header">
+                <div class="header-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>Create New User</h1>
+                <p>Add a new user to the system</p>
+            </div>
+
+            <!-- Body Section -->
+            <div class="create-body">
+                <!-- Validation Summary -->
+                <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+                <div class="form-container">
+                    <form asp-action="Create">
+                        <!-- Personal Information Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Personal Information</span>
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="FullName">Full Name</label>
+                                <div class="input-group-custom">
+                                    <i class="fas fa-user input-icon"></i>
+                                    <input asp-for="FullName" class="form-control-custom" placeholder="Enter full name" />
+                                </div>
+                                <span asp-validation-for="FullName" class="validation-message"></span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="Email">Email Address</label>
+                                <div class="input-group-custom">
+                                    <i class="fas fa-envelope input-icon"></i>
+                                    <input asp-for="Email" class="form-control-custom" placeholder="Enter email address" />
+                                </div>
+                                <span asp-validation-for="Email" class="validation-message"></span>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="PhoneNumber">Phone Number</label>
+                                <div class="input-group-custom">
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <input asp-for="PhoneNumber" class="form-control-custom" placeholder="Enter phone number" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Account Settings Section -->
+                        <div class="form-section">
+                            <div class="section-title">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Account Settings</span>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="Password">Password</label>
+                                <div class="input-group-custom">
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <input asp-for="Password" type="password" class="form-control-custom" placeholder="Enter password" id="passwordInput" />
+                                </div>
+                                <div class="password-strength">
+                                    <div class="strength-bar">
+                                        <div class="strength-fill" id="strengthFill"></div>
+                                    </div>
+                                    <div class="strength-text" id="strengthText">Password strength</div>
+                                </div>
+                                <span asp-validation-for="Password" class="validation-message"></span>
+                            </div>
+
+                            <!-- Role -->
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="Role">User Role</label>
+                                <div class="input-group-custom">
+                                    <i class="fas fa-user-tag input-icon"></i>
+                                    <select asp-for="Role" class="form-control-custom select-custom">
+                                        <option value="">Select a role</option>
+                                        <option value="Admin">Administrator</option>
+                                        <option value="Volunteer">Volunteer</option>
+                                        <option value="User">User</option>
+                                    </select>
+                                </div>
+                                <div class="role-preview">
+                                    <div class="role-badge role-admin" data-role="Admin">Admin</div>
+                                    <div class="role-badge role-volunteer" data-role="Volunteer">Volunteer</div>
+                                    <div class="role-badge role-user" data-role="User">User</div>
+                                </div>
+                                <span asp-validation-for="Role" class="validation-message"></span>
+                            </div>
+
+                            <!-- Date Created -->
+                            <div class="form-group-custom">
+                                <label class="form-label-custom" asp-for="DateCreated">Account Creation Date</label>
+                                <div class="input-group-custom">
+                                    <i class="fas fa-calendar-alt input-icon"></i>
+                                    <input asp-for="DateCreated" class="form-control-custom" type="datetime-local" />
+                                </div>
+                                <span asp-validation-for="DateCreated" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn-create">
+                            <i class="fas fa-user-plus me-2"></i> Create User
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Password strength indicator
+            $('#passwordInput').on('input', function() {
+                const password = $(this).val();
+                const strengthFill = $('#strengthFill');
+                const strengthText = $('#strengthText');
+
+                // Reset
+                strengthFill.removeClass('strength-weak strength-medium strength-strong');
+
+                if (password.length === 0) {
+                    strengthText.text('Password strength');
+                    return;
+                }
+
+                // Simple strength calculation
+                let strength = 0;
+                if (password.length >= 6) strength++;
+                if (password.length >= 8) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                if (strength <= 2) {
+                    strengthFill.addClass('strength-weak');
+                    strengthText.text('Weak password');
+                } else if (strength <= 4) {
+                    strengthFill.addClass('strength-medium');
+                    strengthText.text('Medium strength');
+                } else {
+                    strengthFill.addClass('strength-strong');
+                    strengthText.text('Strong password');
+                }
+            });
+
+            // Role badge selection
+            $('.role-badge').on('click', function() {
+                const role = $(this).data('role');
+                $('select[name="Role"]').val(role);
+                $('.role-badge').removeClass('active');
+                $(this).addClass('active');
+            });
+
+            // Set current date as default for DateCreated
+            const now = new Date();
+            const localDateTime = now.toISOString().slice(0, 16);
+            $('input[name="DateCreated"]').val(localDateTime);
+
+            // Update role badges when select changes
+            $('select[name="Role"]').on('change', function() {
+                const role = $(this).val();
+                $('.role-badge').removeClass('active');
+                $(`.role-badge[data-role="${role}"]`).addClass('active');
+            });
+        });
+    </script>
+</body>
+</html>

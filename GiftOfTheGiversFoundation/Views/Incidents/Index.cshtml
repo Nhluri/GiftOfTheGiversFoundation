@@ -1,0 +1,691 @@
+﻿@model IEnumerable<GiftOfTheGiversFoundation.Models.Incident>
+@{
+    Layout = null;
+    ViewData["Title"] = "Incidents Management";
+
+    // Determine dashboard URL based on user role
+    string dashboardUrl = "/Home";
+    if (User.Identity.IsAuthenticated)
+    {
+        if (User.IsInRole("Admin"))
+        {
+            dashboardUrl = "/Admin/Dashboard";
+        }
+        else if (User.IsInRole("Volunteer"))
+        {
+            dashboardUrl = "/Volunteer/Dashboard";
+        }
+        else
+        {
+            dashboardUrl = "/User/Dashboard";
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --danger: #e63946;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --info: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .incidents-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .incidents-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .incidents-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-text h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .header-text p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .incidents-body {
+            padding: 40px;
+        }
+
+        .btn-report {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .btn-report:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 7px 20px rgba(34, 197, 94, 0.4);
+                color: white;
+            }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 8px;
+        }
+
+            .back-btn:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            }
+
+        /* Filters and Search */
+        .filters-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .search-input {
+            padding-left: 45px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            height: 45px;
+            width: 100%;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            background: white;
+            min-width: 150px;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--light);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .custom-table {
+            margin: 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+        }
+
+            .custom-table thead {
+                background: linear-gradient(135deg, var(--dark) 0%, #2a3d66 100%);
+                color: white;
+            }
+
+            .custom-table th {
+                padding: 18px 15px;
+                font-weight: 600;
+                border: none;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .custom-table tbody tr {
+                transition: all 0.3s ease;
+                border-bottom: 1px solid #e9ecef;
+            }
+
+                .custom-table tbody tr:hover {
+                    background-color: rgba(67, 97, 238, 0.05);
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                }
+
+            .custom-table td {
+                padding: 16px 15px;
+                vertical-align: middle;
+                border: none;
+            }
+
+        /* Badge Styles */
+        .severity-badge, .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .severity-critical {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        .severity-high {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .severity-medium {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .severity-low {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .status-resolved {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .status-in-progress {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-details {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h4 {
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .action-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+            .action-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+            }
+
+        .action-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        /* User Role Badge */
+        .user-role-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="incidents-container">
+        <!-- Dynamic Back Button -->
+        <a href="@dashboardUrl" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+            @if (User.Identity.IsAuthenticated)
+            {
+                <span class="user-role-badge">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <text>Admin</text>
+                    }
+                    else if (User.IsInRole("Volunteer"))
+                    {
+                        <text>Volunteer</text>
+                    }
+                    else
+                    {
+                        <text>User</text>
+                    }
+                </span>
+            }
+        </a>
+
+        <div class="incidents-card">
+            <!-- Header Section -->
+            <div class="incidents-header">
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1><i class="fas fa-exclamation-triangle me-2"></i>Incidents Management</h1>
+                        <p>Monitor and manage all reported incidents</p>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <small class="d-block mt-2">
+                                Logged in as:
+                                <strong>@User.Identity.Name</strong>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <span class="badge bg-warning ms-2">Administrator</span>
+                                }
+                                else if (User.IsInRole("Volunteer"))
+                                {
+                                    <span class="badge bg-info ms-2">Volunteer</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary ms-2">User</span>
+                                }
+                            </small>
+                        }
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Count()</span>
+                            <span class="stat-label">Total Incidents</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Count(i => i.Status == "Resolved")</span>
+                            <span class="stat-label">Resolved</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@Model.Count(i => i.Severity == "Critical")</span>
+                            <span class="stat-label">Critical</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Section -->
+            <div class="incidents-body">
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h5>Report Incident</h5>
+                        <p>Create new incident report</p>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a asp-action="Create" class="btn-report">
+                                <i class="fas fa-plus me-1"></i> Report New
+                            </a>
+                        }
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h5>Alerts</h5>
+                        <p>Critical incidents</p>
+                        <span class="badge bg-danger">
+                            @Model.Count(i => i.Severity == "Critical") Critical
+                        </span>
+                    </div>
+
+                    <!-- Additional action card for different roles -->
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="action-card">
+                            <div class="action-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <h5>Analytics</h5>
+                            <p>View incident reports</p>
+                            <button class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-chart-line me-1"></i> View Reports
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                <!-- Filters and Search -->
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control search-input" placeholder="Search incidents..." id="searchInput">
+                        </div>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                        <select class="filter-select" id="severityFilter">
+                            <option value="">All Severity</option>
+                            <option value="Critical">Critical</option>
+                            <option value="High">High</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Low">Low</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" id="clearFilters">
+                            <i class="fas fa-times me-1"></i> Clear
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Incidents Table -->
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table custom-table">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-heading me-1"></i>Title</th>
+                                    <th><i class="fas fa-tag me-1"></i>Type</th>
+                                    <th><i class="fas fa-exclamation me-1"></i>Severity</th>
+                                    <th><i class="fas fa-map-marker-alt me-1"></i>Location</th>
+                                    <th><i class="fas fa-tasks me-1"></i>Status</th>
+                                    <th><i class="fas fa-calendar me-1"></i>Incident Date</th>
+                                    <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3">
+                                                    <i class="fas fa-file-alt text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>@item.Title</strong>
+                                                    @if (item.Description?.Length > 50)
+                                                    {
+                                                        <small class="text-muted d-block">@item.Description.Substring(0, 50)...</small>
+                                                    }
+                                                    else if (!string.IsNullOrEmpty(item.Description))
+                                                    {
+                                                        <small class="text-muted d-block">@item.Description</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>@item.IncidentType</td>
+                                        <td>
+                                            <span class="severity-badge @($"severity-{item.Severity?.ToLower().Replace(" ", "-")}")">
+                                                @item.Severity
+                                            </span>
+                                        </td>
+                                        <td>@item.Location</td>
+                                        <td>
+                                            <span class="status-badge @($"status-{item.Status?.ToLower().Replace(" ", "-")}")">
+                                                @item.Status
+                                            </span>
+                                        </td>
+                                        <td>@item.IncidentDate.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                <a asp-action="Details" asp-route-id="@item.IncidentID" class="btn-action btn-details">
+                                                    <i class="fas fa-eye"></i> Details
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@item.IncidentID" class="btn-action btn-edit">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                @{
+                                                    var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+                                                    var isOwner = item.UserID == userId;
+                                                }
+                                                @if (User.IsInRole("Admin") || isOwner)
+                                                {
+                                                    <a asp-action="Delete" asp-route-id="@item.IncidentID" class="btn-action btn-delete">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </a>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State -->
+                    @if (!Model.Any())
+                    {
+                        <div class="empty-state">
+                            <div class="empty-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <h4>No Incidents Found</h4>
+                            <p class="mb-4">There are no incidents reported in the system yet.</p>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a asp-action="Create" class="btn-report">
+                                    <i class="fas fa-plus me-2"></i> Report Your First Incident
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Search functionality
+            $('#searchInput').on('keyup', function() {
+                const searchText = $(this).val().toLowerCase();
+                filterTable();
+            });
+
+            // Filter functionality
+            $('#statusFilter, #severityFilter').on('change', function() {
+                filterTable();
+            });
+
+            // Clear filters
+            $('#clearFilters').on('click', function() {
+                $('#searchInput').val('');
+                $('#statusFilter').val('');
+                $('#severityFilter').val('');
+                filterTable();
+            });
+
+            function filterTable() {
+                const searchText = $('#searchInput').val().toLowerCase();
+                const statusFilter = $('#statusFilter').val();
+                const severityFilter = $('#severityFilter').val();
+
+                $('.custom-table tbody tr').each(function() {
+                    const rowText = $(this).text().toLowerCase();
+                    const status = $(this).find('.status-badge').text().trim();
+                    const severity = $(this).find('.severity-badge').text().trim();
+
+                    const matchesSearch = rowText.indexOf(searchText) > -1;
+                    const matchesStatus = !statusFilter || status === statusFilter;
+                    const matchesSeverity = !severityFilter || severity === severityFilter;
+
+                    $(this).toggle(matchesSearch && matchesStatus && matchesSeverity);
+                });
+            }
+
+            // Add hover effects
+            $('.custom-table tbody tr').hover(
+                function() {
+                    $(this).addClass('hover-shadow');
+                },
+                function() {
+                    $(this).removeClass('hover-shadow');
+                }
+            );
+        });
+    </script>
+</body>
+</html>

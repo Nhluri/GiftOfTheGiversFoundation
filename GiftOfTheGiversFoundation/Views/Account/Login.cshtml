@@ -1,0 +1,299 @@
+﻿@model GiftOfTheGiversFoundation.ViewModels.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Login";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e63946;
+            --info: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            max-width: 450px;
+            width: 100%;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .auth-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .auth-header h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.2rem;
+        }
+
+        .auth-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .auth-body {
+            padding: 40px;
+        }
+
+        .form-group-custom {
+            margin-bottom: 25px;
+        }
+
+        .form-label-custom {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            color: #6c757d;
+            z-index: 3;
+        }
+
+        .form-control-custom {
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            height: 50px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            z-index: 4;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+
+        .validation-message {
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+            color: var(--danger);
+            font-weight: 500;
+        }
+
+        .alert-custom {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        .form-check-custom {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-check-input-custom {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            accent-color: var(--primary);
+        }
+
+        .form-check-label-custom {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .btn-auth {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            margin-top: 25px;
+        }
+
+        .auth-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon">
+                    <i class="fas fa-sign-in-alt"></i>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Sign in to your account</p>
+            </div>
+
+            <div class="auth-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-custom">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="All" class="alert alert-danger alert-custom"></div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom" asp-for="Email">Email Address</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input asp-for="Email" class="form-control-custom" placeholder="Enter your email" />
+                        </div>
+                        <span asp-validation-for="Email" class="validation-message"></span>
+                    </div>
+
+                    <div class="form-group-custom">
+                        <label class="form-label-custom" asp-for="Password">Password</label>
+                        <div class="input-group-custom">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input asp-for="Password" class="form-control-custom" type="password" placeholder="Enter your password" />
+                            <button type="button" class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="Password" class="validation-message"></span>
+                    </div>
+
+                    <div class="form-check-custom">
+                        <input asp-for="RememberMe" class="form-check-input-custom" />
+                        <label class="form-check-label-custom" asp-for="RememberMe">Remember me</label>
+                    </div>
+
+                    <button type="submit" class="btn-auth">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>
+                        Don't have an account?
+                        <a asp-action="Register" class="auth-link">Create account here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Password visibility toggle
+            $('.password-toggle').on('click', function() {
+                const input = $(this).closest('.input-group-custom').find('input');
+                const icon = $(this).find('i');
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            // Form submission loading state
+            $('form').on('submit', function() {
+                const submitBtn = $(this).find('.btn-auth');
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i> Signing In...');
+                submitBtn.prop('disabled', true);
+            });
+        });
+    </script>
+</body>
+</html>

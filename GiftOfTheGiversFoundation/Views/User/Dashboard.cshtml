@@ -1,0 +1,642 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "User Dashboard";
+
+    // Get user statistics (you'll need to pass these from your controller)
+    int totalDonations = ViewBag.TotalDonations ?? 0;
+    int totalResources = ViewBag.TotalResources ?? 0;
+    int reportedIncidents = ViewBag.ReportedIncidents ?? 0;
+    int activeIncidents = ViewBag.ActiveIncidents ?? 0;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gift Of The Givers</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #e63946;
+            --info: #4cc9f0;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            background: white;
+            border-radius: 15px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .nav-link:hover {
+                background: var(--primary);
+                color: white;
+                transform: translateY(-2px);
+            }
+
+            .nav-link.logout {
+                background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+                color: white;
+            }
+
+                .nav-link.logout:hover {
+                    background: linear-gradient(135deg, #c1121f 0%, #a1111f 100%);
+                    transform: translateY(-2px);
+                }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .user-role {
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-text h2 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .header-text .lead {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 1.2rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+            background: rgba(255,255,255,0.2);
+            padding: 20px 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dashboard-body {
+            padding: 40px;
+        }
+
+        /* Card Styles */
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+            .feature-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .feature-description {
+            color: #6c757d;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .btn-feature {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-profile {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .btn-resources {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .btn-donations {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-my-resources {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+        }
+
+        .btn-my-donations {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .btn-report-incident {
+            background: linear-gradient(135deg, var(--danger) 0%, #c1121f 100%);
+            color: white;
+        }
+
+        .btn-view-incidents {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-feature:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-top: 4px solid;
+            transition: all 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+            }
+
+            .stat-card.donations {
+                border-color: var(--warning);
+            }
+
+            .stat-card.resources {
+                border-color: var(--success);
+            }
+
+            .stat-card.incidents-reported {
+                border-color: var(--danger);
+            }
+
+            .stat-card.incidents-active {
+                border-color: var(--info);
+            }
+
+        .stat-card-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card.donations .stat-card-icon {
+            color: var(--warning);
+        }
+
+        .stat-card.resources .stat-card-icon {
+            color: var(--success);
+        }
+
+        .stat-card.incidents-reported .stat-card-icon {
+            color: var(--danger);
+        }
+
+        .stat-card.incidents-active .stat-card-icon {
+            color: var(--info);
+        }
+
+        .stat-card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: block;
+        }
+
+        .stat-card-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Welcome Message */
+        .welcome-section {
+            background: linear-gradient(135deg, var(--info) 0%, #4895ef 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        /* User Role Display */
+        .user-role-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 15px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Navigation Header -->
+        <div class="nav-header">
+            <a href="/User/Dashboard" class="nav-brand">
+                <i class="fas fa-hands-helping"></i>
+                Gift Of The Givers
+            </a>
+
+            <div class="nav-links">
+                <a href="/User/Dashboard" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    Home
+                </a>
+                <a href="/Account/Profile" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    Profile
+                </a>
+                <a href="/Incident/Index" class="nav-link">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Incidents
+                </a>
+                <a href="/Account/Logout" class="nav-link logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                @User.Identity.Name
+                <span class="user-role">User</span>
+            </div>
+        </div>
+
+        <div class="dashboard-card">
+            <!-- Header Section -->
+            <div class="dashboard-header">
+                <div class="header-content">
+                    <div class="header-text">
+                        <h2>Welcome, @User.Identity.Name! <span class="user-role-badge">User</span></h2>
+                        <p class="lead">Submit resources and make donations to support relief efforts</p>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-value">@totalDonations</span>
+                            <span class="stat-label">Donations</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@totalResources</span>
+                            <span class="stat-label">Resources</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">@reportedIncidents</span>
+                            <span class="stat-label">Incidents</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body Section -->
+            <div class="dashboard-body">
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div class="welcome-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <div class="welcome-title">Make a Difference Today</div>
+                    <div class="welcome-subtitle">
+                        Your contributions help provide critical support during disaster relief efforts.
+                        Every donation and resource submission makes a meaningful impact.
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="quick-stats">
+                    <h4 class="mb-4 text-center">Your Impact Summary</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card donations">
+                            <div class="stat-card-icon">
+                                <i class="fas fa-hand-holding-usd"></i>
+                            </div>
+                            <span class="stat-card-value">@totalDonations</span>
+                            <span class="stat-card-label">Total Donations</span>
+                        </div>
+                        <div class="stat-card resources">
+                            <div class="stat-card-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <span class="stat-card-value">@totalResources</span>
+                            <span class="stat-card-label">Resources Shared</span>
+                        </div>
+                        <div class="stat-card incidents-reported">
+                            <div class="stat-card-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <span class="stat-card-value">@reportedIncidents</span>
+                            <span class="stat-card-label">Incidents Reported</span>
+                        </div>
+                        <div class="stat-card incidents-active">
+                            <div class="stat-card-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <span class="stat-card-value">@activeIncidents</span>
+                            <span class="stat-card-label">Active Incidents</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Grid -->
+                <div class="row">
+                    <!-- Profile -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <h5 class="feature-title">Profile Management</h5>
+                            <p class="feature-description">View and update your profile information and contact details.</p>
+                            <a asp-controller="Account" asp-action="Profile" class="btn-feature btn-profile">
+                                <i class="fas fa-user-cog me-2"></i> Go to Profile
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Submit Resources -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <h5 class="feature-title">Submit Resources</h5>
+                            <p class="feature-description">Offer resources like food, shelter, or medical supplies to those in need.</p>
+                            <a asp-controller="Resource" asp-action="Create" class="btn-feature btn-resources">
+                                <i class="fas fa-plus me-2"></i> Submit Resources
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Make Donations -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-donate"></i>
+                            </div>
+                            <h5 class="feature-title">Make Donations</h5>
+                            <p class="feature-description">Donate funds or items to support disaster relief efforts and emergency response.</p>
+                            <a asp-controller="Donation" asp-action="Create" class="btn-feature btn-donations">
+                                <i class="fas fa-hand-holding-heart me-2"></i> Make Donation
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- My Resources -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                            <h5 class="feature-title">My Resources</h5>
+                            <p class="feature-description">View and manage your submitted resources and track their status.</p>
+                            <a asp-controller="Resource" asp-action="Index" class="btn-feature btn-my-resources">
+                                <i class="fas fa-eye me-2"></i> View My Resources
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- My Donations -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <h5 class="feature-title">My Donations</h5>
+                            <p class="feature-description">View your donation history, receipts, and current status of contributions.</p>
+                            <a asp-controller="Donation" asp-action="Index" class="btn-feature btn-my-donations">
+                                <i class="fas fa-history me-2"></i> View My Donations
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Report Incidents -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <h5 class="feature-title">Report Incidents</h5>
+                            <p class="feature-description">Report disaster incidents in your area to help coordinate emergency response.</p>
+                            <a asp-controller="Incident" asp-action="Create" class="btn-feature btn-report-incident">
+                                <i class="fas fa-flag me-2"></i> Report Incident
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- View Incidents -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-map-marked-alt"></i>
+                            </div>
+                            <h5 class="feature-title">View Incidents</h5>
+                            <p class="feature-description">See all reported incidents and their current status in your region.</p>
+                            <a asp-controller="Incident" asp-action="Index" class="btn-feature btn-view-incidents">
+                                <i class="fas fa-list me-2"></i> View Incidents
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Add hover effects to feature cards
+            $('.feature-card').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-5px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+
+            // Add hover effects to stat cards
+            $('.stat-card').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-3px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+
+            // Add hover effects to nav links
+            $('.nav-link').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-2px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+        });
+    </script>
+</body>
+</html>

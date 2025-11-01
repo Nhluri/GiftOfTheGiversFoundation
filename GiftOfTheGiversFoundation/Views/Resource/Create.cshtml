@@ -1,0 +1,58 @@
+﻿@model GiftOfTheGiversFoundation.Models.Resource
+
+@{
+    ViewData["Title"] = "Submit Resource";
+}
+
+<h2>Submit Resource</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group mb-3">
+                <label asp-for="ResourceType" class="control-label">Resource Type</label>
+                <select asp-for="ResourceType" class="form-control">
+                    <option value="">Select Resource Type</option>
+                    <option value="Food">Food</option>
+                    <option value="Water">Water</option>
+                    <option value="Shelter">Shelter</option>
+                    <option value="Medical">Medical Supplies</option>
+                    <option value="Clothing">Clothing</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span asp-validation-for="ResourceType" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Quantity" class="control-label">Quantity</label>
+                <input asp-for="Quantity" class="form-control" min="1" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the resource in detail"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Location" class="control-label">Location</label>
+                <input asp-for="Location" class="form-control" placeholder="Where is this resource available?" />
+                <span asp-validation-for="Location" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-success">Submit Resource</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

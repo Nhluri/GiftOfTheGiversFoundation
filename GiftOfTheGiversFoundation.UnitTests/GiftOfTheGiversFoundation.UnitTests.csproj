@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+		<PackageReference Include="MSTest" Version="3.6.4" />
+		<PackageReference Include="coverlet.collector" Version="6.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.8" />
+		<PackageReference Include="Moq" Version="4.20.70" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\GiftOfTheGiversFoundation\GiftOfTheGiversFoundation.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Browse Available Tasks";
+    var assignedTasks = ViewBag.AssignedTasks as List<TaskAssignment> ?? new List<TaskAssignment>();
+    var availableTasks = ViewBag.AvailableTasks as List<VolunteerTask> ?? new List<VolunteerTask>();
+    var assignedTasksCount = ViewBag.AssignedTasksCount ?? 0;
+    var availableTasksCount = ViewBag.AvailableTasksCount ?? 0;
+}
+
+<h2>Available Volunteer Tasks</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<!-- Task Statistics -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-warning">
+            <div class="card-body text-center">
+                <h5>Tasks Assigned to You</h5>
+                <h2>@assignedTasksCount</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-success">
+            <div class="card-body text-center">
+                <h5>Available Tasks</h5>
+                <h2>@availableTasksCount</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assigned Tasks Section -->
+@if (assignedTasks.Any())
+{
+    <div class="mb-5">
+        <h3 class="text-warning">Tasks Assigned to You</h3>
+        <div class="row">
+            @foreach (var task in assignedTasks)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm border-warning">
+                        <div class="card-header bg-warning text-white">
+                            <h5 class="card-title mb-0">@task.TaskTitle</h5>
+                            <span class="badge bg-dark float-end">Assigned</span>
+                        </div>
+                        <div class="card-body">
+                            <span class="badge bg-@(task.Priority == "Critical" ? "danger" : task.Priority == "High" ? "warning" : task.Priority == "Medium" ? "info" : "success")">
+                                @task.Priority Priority
+                            </span>
+                            <p class="card-text mt-2">@task.TaskDescription</p>
+                            <ul class="list-unstyled">
+                                <li><strong>Due Date:</strong> @task.DueDate.ToString("MMM dd, yyyy")</li>
+                                <li><strong>Assigned On:</strong> @task.DateAssigned.ToString("MMM dd, yyyy")</li>
+                                <li>
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-@(task.Status == "Assigned" ? "warning" : task.Status == "In Progress" ? "info" : "success")">
+                                        @task.Status
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <form asp-action="StartAssignedTask" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="taskId" value="@task.TaskID" />
+                                <button type="submit" class="btn btn-warning btn-sm">Start This Task</button>
+                                <a href="#" class="btn btn-info btn-sm">View Details</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Available Tasks Section -->
+@if (availableTasks.Any())
+{
+    <div class="mb-5">
+        <h3 class="text-success">Available Volunteer Tasks</h3>
+        <div class="row">
+            @foreach (var task in availableTasks)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">@task.Title</h5>
+                            <span class="badge bg-@(task.Urgency == "Critical" ? "danger" : task.Urgency == "High" ? "warning" : task.Urgency == "Medium" ? "info" : "success") float-end">
+                                @task.Urgency
+                            </span>
+                            <p class="card-text">@task.Description</p>
+                            <ul class="list-unstyled">
+                                <li><strong>Type:</strong> @task.TaskType</li>
+                                <li><strong>Location:</strong> @task.Location</li>
+                                <li><strong>Estimated Hours:</strong> @task.EstimatedHours hours</li>
+                                @if (!string.IsNullOrEmpty(task.RequiredSkills))
+                                {
+                                    <li><strong>Skills Needed:</strong> @task.RequiredSkills</li>
+                                }
+                                <li>
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-success">@task.Status</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer">
+                            <form asp-action="SignUpForTask" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="taskId" value="@task.TaskID" />
+                                <button type="submit" class="btn btn-success btn-sm">Sign Up for This Task</button>
+                                <a asp-action="TaskDetails" asp-route-id="@task.TaskID" class="btn btn-info btn-sm">View Details</a>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (!assignedTasks.Any() && !availableTasks.Any())
+{
+    <div class="alert alert-info">
+        <h5>No available tasks at the moment.</h5>
+        <p class="mb-0">Please check back later for new volunteer opportunities.</p>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-controller="Volunteer" asp-action="Dashboard" class="btn btn-secondary">Back to Dashboard</a>
+</div>

@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "TestDatabase": "Server=(localdb)\\mssqllocaldb;Database=GiftOfTheGiversTest;Trusted_Connection=true;MultipleActiveResultSets=true"
+  }
+}

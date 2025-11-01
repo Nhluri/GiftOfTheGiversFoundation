@@ -1,0 +1,61 @@
+﻿@model IEnumerable<GiftOfTheGiversFoundation.Models.Donation>
+
+@{
+    ViewData["Title"] = "My Donations";
+}
+
+<h2>My Donations</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Make New Donation</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Donation Type</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Donation Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.DonationType)</td>
+                <td>
+                    @if (item.Amount.HasValue)
+                    {
+                        <text>R @item.Amount.Value.ToString("F2")</text>
+                    }
+                    else
+                    {
+                        <text>-</text>
+                    }
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>
+                    <span class="badge bg-@(item.Status == "Received" ? "success" : item.Status == "Distributed" ? "primary" : "warning")">
+                        @Html.DisplayFor(modelItem => item.Status)
+                    </span>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.DonationDate)</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.DonationID" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Edit" asp-route-id="@item.DonationID" class="btn btn-warning btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.DonationID" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No donations made yet. <a asp-action="Create">Make your first donation</a>.
+    </div>
+}

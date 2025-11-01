@@ -1,0 +1,114 @@
+﻿@model GiftOfTheGiversFoundation.Models.Donation
+
+@{
+    ViewData["Title"] = "Make Donation";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-donate me-2"></i>Make a Donation</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="DonationType" class="control-label font-weight-bold"></label>
+                            <select asp-for="DonationType" class="form-control" required>
+                                <option value="">-- Select Donation Type --</option>
+                                <option value="Monetary">Monetary Donation</option>
+                                <option value="Food">Food Supplies</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Medical Supplies">Medical Supplies</option>
+                                <option value="Shelter">Shelter/Accommodation</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span asp-validation-for="DonationType" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Amount" class="control-label font-weight-bold"></label>
+                            <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Enter amount for monetary donations. Leave empty for other donation types.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label font-weight-bold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Please describe your donation in detail..." required></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                For non-monetary donations, please specify items, quantities, and any other relevant details.
+                            </small>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Donation
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back to List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Information Card -->
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Donation Information</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Donation Types:</h6>
+                    <ul class="mb-3">
+                        <li><strong>Monetary:</strong> Financial contributions</li>
+                        <li><strong>Food:</strong> Non-perishable food items, canned goods</li>
+                        <li><strong>Clothing:</strong> New or gently used clothing</li>
+                        <li><strong>Medical Supplies:</strong> First aid kits, medications, medical equipment</li>
+                        <li><strong>Shelter:</strong> Temporary accommodation offers</li>
+                        <li><strong>Other:</strong> Any other form of assistance</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Note:</strong> All donations will be reviewed by our team and marked as "Pending" until processed.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Show/hide amount field based on donation type
+        document.addEventListener('DOMContentLoaded', function() {
+            const donationTypeSelect = document.getElementById('DonationType');
+            const amountInput = document.getElementById('Amount');
+            const amountGroup = amountInput.closest('.form-group');
+
+            function toggleAmountField() {
+                if (donationTypeSelect.value === 'Monetary') {
+                    amountGroup.style.display = 'block';
+                    amountInput.setAttribute('required', 'required');
+                } else {
+                    amountGroup.style.display = 'block'; // Still show but not required
+                    amountInput.removeAttribute('required');
+                    amountInput.value = ''; // Clear amount for non-monetary donations
+                }
+            }
+
+            donationTypeSelect.addEventListener('change', toggleAmountField);
+            toggleAmountField(); // Initial check
+        });
+    </script>
+}

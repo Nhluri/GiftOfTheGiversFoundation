@@ -1,0 +1,422 @@
+﻿@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --info: #4895ef;
+            --warning: #f72585;
+            --danger: #e63946;
+            --dark: #1d3557;
+            --light: #f8f9fa;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+            .sidebar-menu .nav-link {
+                color: rgba(255,255,255,0.8);
+                padding: 12px 20px;
+                margin: 5px 0;
+                border-radius: 0;
+                transition: all 0.3s;
+            }
+
+                .sidebar-menu .nav-link:hover,
+                .sidebar-menu .nav-link.active {
+                    color: white;
+                    background-color: rgba(255,255,255,0.1);
+                    border-left: 4px solid white;
+                }
+
+                .sidebar-menu .nav-link i {
+                    margin-right: 10px;
+                    width: 20px;
+                    text-align: center;
+                }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .welcome-text {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .lead {
+            color: #6c757d;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid var(--primary);
+        }
+
+            .stats-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            }
+
+            .stats-card h5 {
+                color: var(--dark);
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .stats-card p {
+                color: #6c757d;
+                font-size: 0.85rem;
+                margin-bottom: 15px;
+            }
+
+        .stats-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .stats-card.profile {
+            border-left-color: var(--primary);
+        }
+
+        .stats-card.users {
+            border-left-color: var(--info);
+        }
+
+        .stats-card.incidents {
+            border-left-color: var(--danger);
+        }
+
+        .stats-card.tasks {
+            border-left-color: var(--warning);
+        }
+
+        .stats-card.schedules {
+            border-left-color: var(--success);
+        }
+
+        .stats-card.donations {
+            border-left-color: #4ade80;
+        }
+
+        .stats-card.profile .stats-icon {
+            color: var(--primary);
+        }
+
+        .stats-card.users .stats-icon {
+            color: var(--info);
+        }
+
+        .stats-card.incidents .stats-icon {
+            color: var(--danger);
+        }
+
+        .stats-card.tasks .stats-icon {
+            color: var(--warning);
+        }
+
+        .stats-card.schedules .stats-icon {
+            color: var(--success);
+        }
+
+        .stats-card.donations .stats-icon {
+            color: #4ade80;
+        }
+
+        .btn-custom {
+            border-radius: 6px;
+            font-weight: 600;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-profile {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .btn-users {
+            background-color: var(--info);
+            border-color: var(--info);
+        }
+
+        .btn-incidents {
+            background-color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .btn-tasks {
+            background-color: var(--warning);
+            border-color: var(--warning);
+        }
+
+        .btn-schedules {
+            background-color: var(--success);
+            border-color: var(--success);
+        }
+
+        .btn-donations {
+            background-color: #4ade80;
+            border-color: #4ade80;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        }</style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-hands-helping me-2"></i> ReliefOps</h3>
+            </div>
+            <div class="sidebar-menu">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Account" asp-action="Profile">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="UserManagement" asp-action="Index">
+                            <i class="fas fa-users"></i>
+                            <span>User Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Incident" asp-action="Index">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>All Incidents</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Admin" asp-action="AssignTasks">
+                            <i class="fas fa-tasks"></i>
+                            <span>Assign Tasks</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Admin" asp-action="ManageSchedules">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Manage Schedules</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Admin" asp-action="ManageDonations">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span>Manage Donations</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h2 class="welcome-text">Welcome, @User.Identity.Name! <span class="badge bg-primary">Admin</span></h2>
+                <p class="lead">Manage the system, assign tasks, and oversee relief operations</p>
+            </div>
+
+            <div class="row">
+                <!-- Profile Card -->
+                <div class="col-md-4">
+                    <div class="stats-card profile">
+                        <div class="stats-icon">
+                            <i class="fas fa-user-cog"></i>
+                        </div>
+                        <h5>Admin Profile</h5>
+                        <p>View and update your administrator profile and settings.</p>
+                        <a asp-controller="Account" asp-action="Profile" class="btn btn-primary btn-custom btn-profile">Go to Profile</a>
+                    </div>
+                </div>
+                <!-- User Management -->
+                <div class="col-md-4">
+                    <div class="stats-card users">
+                        <div class="stats-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <h5>User Management</h5>
+                        <p>Manage all system users and their permissions and roles.</p>
+                        <a asp-controller="UserManagement" asp-action="Index" class="btn btn-info btn-custom btn-users">Manage Users</a>
+                    </div>
+                </div>
+
+                <!-- All Incidents -->
+                <div class="col-md-4">
+                    <div class="stats-card incidents">
+                        <div class="stats-icon">
+                            <i class="fas fa-file-medical-alt"></i>
+                        </div>
+                        <h5>All Incidents</h5>
+                        <p>View and manage all incident reports in the system.</p>
+                        <a asp-controller="Incident" asp-action="Index" class="btn btn-danger btn-custom btn-incidents">View Incidents</a>
+                    </div>
+                </div>
+
+                <!-- Assign Tasks -->
+                <div class="col-md-4">
+                    <div class="stats-card tasks">
+                        <div class="stats-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+                        <h5>Assign Volunteer Tasks</h5>
+                        <p>Assign and manage tasks for volunteers and teams.</p>
+                        <a asp-controller="Admin" asp-action="AssignTasks" class="btn btn-warning btn-custom btn-tasks">Assign Tasks</a>
+                    </div>
+                </div>
+
+                <!-- Manage Schedules -->
+                <div class="col-md-4">
+                    <div class="stats-card schedules">
+                        <div class="stats-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h5>Manage Schedules</h5>
+                        <p>Coordinate volunteer schedules and team assignments.</p>
+                        <a asp-controller="Admin" asp-action="ManageSchedules" class="btn btn-success btn-custom btn-schedules">Manage Schedules</a>
+                    </div>
+                </div>
+
+                <!-- Manage Donations -->
+                <div class="col-md-4">
+                    <div class="stats-card donations">
+                        <div class="stats-icon">
+                            <i class="fas fa-donate"></i>
+                        </div>
+                        <h5>Manage Donations</h5>
+                        <p>Oversee and track all donation activities and resources.</p>
+                        <a asp-controller="Admin" asp-action="ManageDonations" class="btn btn-custom btn-donations" style="color: white;">Manage Donations</a>
+                    </div>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                // Simple toggle functionality for mobile view
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Add hover effects to cards
+                    const cards = document.querySelectorAll('.stats-card');
+                    cards.forEach(card => {
+                        card.addEventListener('mouseenter', function() {
+                            this.style.transform = 'translateY(-5px)';
+                        });
+
+                        card.addEventListener('mouseleave', function() {
+                            this.style.transform = 'translateY(0)';
+                        });
+                    });
+                });
+            </script>
+</body>
+</html>

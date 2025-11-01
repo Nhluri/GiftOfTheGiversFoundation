@@ -1,0 +1,50 @@
+﻿@model GiftOfTheGiversFoundation.Models.VolunteerContribution
+
+@{
+    ViewData["Title"] = "Log Hours";
+}
+
+<h2>Log Hours for: @Model.Task?.Title</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="LogHours" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.ContributionID" />
+
+            <div class="form-group mb-3">
+                <label for="hoursWorked" class="control-label">Hours Worked</label>
+                <input type="number" name="hoursWorked" class="form-control" step="0.5" min="0.5" max="24" required />
+                <small class="form-text text-muted">Enter the number of hours you worked (0.5 to 24)</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="workDescription" class="control-label">Work Description</label>
+                <textarea name="workDescription" class="form-control" rows="4" required placeholder="Describe what you accomplished during these hours...">@Model.Description</textarea>
+            </div>
+
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-success">Submit Hours</button>
+                <a asp-action="MyContributions" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Task Information</h5>
+                <p><strong>Task:</strong> @Model.Task?.Title</p>
+                <p><strong>Type:</strong> @Model.Task?.TaskType</p>
+                <p><strong>Location:</strong> @Model.Task?.Location</p>
+                <p><strong>Estimated Hours:</strong> @Model.Task?.EstimatedHours hours</p>
+                <p>
+                    <strong>Current Status:</strong>
+                    <span class="badge bg-@(Model.Status == "Completed" ? "success" : "warning")">
+                        @Model.Status
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

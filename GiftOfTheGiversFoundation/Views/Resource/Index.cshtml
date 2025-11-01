@@ -1,0 +1,55 @@
+﻿@model IEnumerable<GiftOfTheGiversFoundation.Models.Resource>
+
+@{
+    ViewData["Title"] = "My Resources";
+}
+
+<h2>My Submitted Resources</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Submit New Resource</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Resource Type</th>
+            <th>Quantity</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Date Submitted</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.ResourceType)</td>
+                <td>@Html.DisplayFor(modelItem => item.Quantity)</td>
+                <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                <td>@Html.DisplayFor(modelItem => item.Location)</td>
+                <td>
+                    <span class="badge bg-@(item.Availability == "Available" ? "success" : "warning")">
+                        @Html.DisplayFor(modelItem => item.Availability)
+                    </span>
+                </td>
+                <td>@Html.DisplayFor(modelItem => item.DateSubmitted)</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.ResourceID" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Delete" asp-route-id="@item.ResourceID" class="btn btn-danger btn-sm">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.ResourceID" class="btn btn-warning btn-sm">Edit</a>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No resources submitted yet. <a asp-action="Create">Submit your first resource</a>.
+    </div>
+}

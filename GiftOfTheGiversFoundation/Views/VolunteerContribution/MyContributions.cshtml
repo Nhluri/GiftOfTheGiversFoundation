@@ -1,0 +1,131 @@
+﻿@model IEnumerable<GiftOfTheGiversFoundation.Models.VolunteerContribution>
+@{
+    ViewData["Title"] = "My Contributions";
+    var totalHours = ViewBag.TotalHours ?? 0;
+    var totalTasks = ViewBag.TotalTasks ?? 0;
+    var completedTasks = ViewBag.CompletedTasks ?? 0;
+}
+
+<h2>My Volunteer Contributions</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <h5>Total Hours</h5>
+                <h2>@totalHours.ToString("F1")</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success">
+            <div class="card-body text-center">
+                <h5>Completed Tasks</h5>
+                <h2>@completedTasks</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-info">
+            <div class="card-body text-center">
+                <h5>Total Tasks</h5>
+                <h2>@totalTasks</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Task</th>
+                <th>Hours</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contribution in Model)
+            {
+                <tr>
+                    <td>
+                        @if (contribution.Task != null)
+                        {
+                            <strong>@contribution.Task.Title</strong>
+                            @if (!string.IsNullOrEmpty(contribution.Description))
+                            {
+                                <br>
+                                <small class="text-muted">@contribution.Description</small>
+                            }
+                        }
+                        else
+                        {
+                            <strong>@contribution.Description</strong>
+                        }
+                    </td>
+                    <td>
+                        @if (contribution.HoursWorked > 0)
+                        {
+                            <span class="font-weight-bold text-success">@contribution.HoursWorked.ToString("F1") hours</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not logged</span>
+                        }
+                    </td>
+                    <td>
+                        <span class="badge bg-@(contribution.Status == "Completed" ? "success" : "warning")">
+                            @contribution.Status
+                        </span>
+                    </td>
+                    <td>@contribution.ContributionDate.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        @if (contribution.Status == "In Progress")
+                        {
+                            <a asp-action="MarkCompleted" asp-route-id="@contribution.ContributionID" class="btn btn-success btn-sm">Mark Completed</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Completed</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No contributions yet.</h5>
+        <p class="mb-0">Start by browsing available tasks and signing up for one!</p>
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-controller="Volunteer" asp-action="Dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    <a asp-controller="VolunteerTask" asp-action="BrowseTasks" class="btn btn-primary">Browse Tasks</a>
+</div>

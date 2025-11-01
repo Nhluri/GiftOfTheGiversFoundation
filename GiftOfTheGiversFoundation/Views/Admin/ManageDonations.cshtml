@@ -1,0 +1,209 @@
+﻿@model List<Donation>
+@{
+    ViewData["Title"] = "Manage Donations";
+}
+
+<div class="container">
+    <h2>Manage Donations</h2>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h5>Total Donations</h5>
+                    <h3>@ViewBag.TotalDonations</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h5>Total Amount</h5>
+                    <h3>R @ViewBag.TotalAmount.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h5>Pending</h5>
+                    <h3>@ViewBag.PendingCount</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h5>Completed</h5>
+                    <h3>@ViewBag.CompletedCount</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donations Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">All Donations (@Model.Count)</h5>
+            <span class="badge badge-primary badge-pill">Showing @Model.Count donations</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Donor</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th width="250">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var donation in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@donation.User?.FullName</strong>
+                                        <br>
+                                        <small class="text-muted">@donation.User?.Email</small>
+                                    </td>
+                                    <td>@donation.DonationType</td>
+                                    <td>
+                                        @if (donation.Amount.HasValue)
+                                        {
+                                            <span class="font-weight-bold text-success">R @donation.Amount.Value.ToString("N2")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">N/A</span>
+                                        }
+                                </td>
+                                <td>
+                                    <span title="@donation.Description">
+                                        @(donation.Description.Length > 50 ? donation.Description.Substring(0, 50) + "..." : donation.Description)
+                                    </span>
+                                </td>
+                                <td>@donation.DonationDate.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <span class="badge
+                                                @(donation.Status == "Completed" ? "badge-success" :
+                                                                                        donation.Status == "Pending" ? "badge-warning" :
+                                                                                        donation.Status == "Cancelled" ? "badge-danger" : "badge-secondary")">
+                                    @donation.Status
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-nowrap gap-2">
+                                    <!-- Details -->
+                                    <a asp-action="DonationDetails" asp-route-id="@donation.DonationID"
+                                       class="btn btn-info btn-sm" title="View Details">
+                                        <i class="fas fa-eye"></i> Details
+                                    </a>
+
+
+
+                                            <!-- Status Update Buttons -->
+                                    @if (donation.Status != "Completed")
+                                            {
+                                                <form asp-action="UpdateDonationStatus" method="post" class="d-inline">
+                                                    <input type="hidden" name="donationId" value="@donation.DonationID" />
+                                                    <input type="hidden" name="status" value="Completed" />
+                                                    <button type="submit" class="btn btn-success btn-sm" title="Mark as Completed">
+                                                        <i class="fas fa-check"></i> Complete
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (donation.Status != "Cancelled")
+                                            {
+                                                <form asp-action="UpdateDonationStatus" method="post" class="d-inline">
+                                                    <input type="hidden" name="donationId" value="@donation.DonationID" />
+                                                    <input type="hidden" name="status" value="Cancelled" />
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Mark as Cancelled"
+                                                            onclick="return confirm('Are you sure you want to cancel this donation?');">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <!-- Delete -->
+                                            <form asp-action="DeleteDonation" method="post" class="d-inline"
+                                                  onsubmit="return confirm('Are you sure you want to delete this donation?');">
+                                                <input type="hidden" name="donationId" value="@donation.DonationID" />
+                                                <button type="submit" class="btn btn-dark btn-sm" title="Delete Donation">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">
+                    <h5>No donations found.</h5>
+                    <p class="mb-0">There are no donations in the system yet.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function () {
+            $('.alert').alert('close');
+        }, 5000);
+    </script>
+
+    <style>
+        .gap-2 > * {
+            margin-right: 0.5rem !important;
+        }
+
+            .gap-2 > *:last-child {
+                margin-right: 0 !important;
+            }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+    </style>
+}

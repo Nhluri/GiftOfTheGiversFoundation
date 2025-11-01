@@ -1,0 +1,81 @@
+﻿@model Donation
+@{
+    ViewData["Title"] = "Donation Details";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-donate me-2"></i>Donation Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Donation Information</h5>
+                            <dl class="row">
+                                <dt class="col-sm-5">Donation ID:</dt>
+                                <dd class="col-sm-7">@Model.DonationID</dd>
+
+                                <dt class="col-sm-5">Donation Type:</dt>
+                                <dd class="col-sm-7">@Model.DonationType</dd>
+
+                                <dt class="col-sm-5">Amount:</dt>
+                                <dd class="col-sm-7">
+                                    @if (Model.Amount.HasValue)
+                                    {
+                                        <span class="font-weight-bold text-success">R @Model.Amount.Value.ToString("N2")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Not specified</span>
+                                    }
+                                </dd>
+
+                                <dt class="col-sm-5">Status:</dt>
+                                <dd class="col-sm-7">
+                                    <span class="badge
+                                        @(Model.Status == "Completed" ? "badge-success" :
+                                                                                    Model.Status == "Pending" ? "badge-warning" :
+                                                                                    Model.Status == "Cancelled" ? "badge-danger" : "badge-secondary")">
+                                        @Model.Status
+                                    </span>
+                                </dd>
+
+                                <dt class="col-sm-5">Donation Date:</dt>
+                                <dd class="col-sm-7">@Model.DonationDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                            </dl>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Donor Information</h5>
+                            <dl class="row">
+                                <dt class="col-sm-5">Donor Name:</dt>
+                                <dd class="col-sm-7">@Model.User?.FullName</dd>
+
+                                <dt class="col-sm-5">Donor Email:</dt>
+                                <dd class="col-sm-7">@Model.User?.Email</dd>
+
+                                <dt class="col-sm-5">User ID:</dt>
+                                <dd class="col-sm-7">@Model.UserID</dd>
+                            </dl>
+
+                            <h5 class="border-bottom pb-2 mt-4">Description</h5>
+                            <div class="border rounded p-3 bg-light">
+                                @Model.Description
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a asp-action="ManageDonations" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Back to List
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,113 @@
+﻿@model GiftOfTheGiversFoundation.Models.Donation
+
+@{
+    ViewData["Title"] = "Edit Donation";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Donation</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="DonationID" />
+                        <input type="hidden" asp-for="UserID" />
+                        <input type="hidden" asp-for="DonationDate" />
+                        <input type="hidden" asp-for="Status" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="DonationType" class="control-label font-weight-bold"></label>
+                            <select asp-for="DonationType" class="form-control" required>
+                                <option value="">-- Select Donation Type --</option>
+                                <option value="Monetary">Monetary Donation</option>
+                                <option value="Food">Food Supplies</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Medical Supplies">Medical Supplies</option>
+                                <option value="Shelter">Shelter/Accommodation</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <span asp-validation-for="DonationType" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Amount" class="control-label font-weight-bold"></label>
+                            <input asp-for="Amount" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Enter amount for monetary donations. Leave empty for other donation types.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label font-weight-bold"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" required>@Model.Description</textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Note:</strong> You cannot change the donation status. Only administrators can update the status of your donation.
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-save me-2"></i>Update Donation
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Donation Status Card -->
+            <div class="card mt-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Current Status</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge
+                                @(Model.Status == "Completed" ? "badge-success" :
+                                                                    Model.Status == "Pending" ? "badge-warning" :
+                                                                    Model.Status == "Cancelled" ? "badge-danger" : "badge-secondary")">
+                                @Model.Status
+                            </span>
+                        </dd>
+                        <dt class="col-sm-4">Donation Date:</dt>
+                        <dd class="col-sm-8">@Model.DonationDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Set the selected option for donation type
+        document.addEventListener('DOMContentLoaded', function() {
+            var donationTypeSelect = document.getElementById('DonationType');
+            if (donationTypeSelect) {
+                for (var i = 0; i < donationTypeSelect.options.length; i++) {
+                    if (donationTypeSelect.options[i].value === '@Model.DonationType') {
+                        donationTypeSelect.options[i].selected = true;
+                        break;
+                    }
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,109 @@
+﻿@model GiftOfTheGiversFoundation.Models.Incident
+
+@{
+    ViewData["Title"] = "Edit Incident";
+}
+
+<h1>Edit Incident</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="IncidentID" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="IncidentType" class="control-label"></label>
+                        <select asp-for="IncidentType" class="form-control">
+                            <option value="Flood">Flood</option>
+                            <option value="Fire">Fire</option>
+                            <option value="Earthquake">Earthquake</option>
+                            <option value="Storm">Storm</option>
+                            <option value="Medical Emergency">Medical Emergency</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <span asp-validation-for="IncidentType" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="Severity" class="control-label"></label>
+                        <select asp-for="Severity" class="form-control">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                        <span asp-validation-for="Severity" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Location" class="control-label"></label>
+                <input asp-for="Location" class="form-control" />
+                <span asp-validation-for="Location" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="IncidentDate" class="control-label"></label>
+                        <input asp-for="IncidentDate" class="form-control" />
+                        <span asp-validation-for="IncidentDate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="PeopleAffected" class="control-label"></label>
+                        <input asp-for="PeopleAffected" class="form-control" />
+                        <span asp-validation-for="PeopleAffected" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="EmergencyNeeds" class="control-label"></label>
+                <input asp-for="EmergencyNeeds" class="form-control" />
+                <span asp-validation-for="EmergencyNeeds" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Status" class="control-label"></label>
+                <select asp-for="Status" class="form-control">
+                    <option value="Reported">Reported</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <input type="submit" value="Save Changes" class="btn btn-primary" />
+                <a asp-action="Details" asp-route-id="@Model.IncidentID" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

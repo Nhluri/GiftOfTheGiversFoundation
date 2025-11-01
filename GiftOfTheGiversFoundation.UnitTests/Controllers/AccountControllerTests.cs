@@ -8,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity.UI.Services; // FIXED: Correct namespace
+using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Text.Json;
 
 namespace GiftOfTheGiversFoundation.UnitTests.Controllers
 {
@@ -19,6 +20,8 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
         private Mock<IEmailSender>? _emailSenderMock;
         private ApplicationDbContext? _context;
         private AccountController? _controller;
+        private Mock<ISession>? _sessionMock;
+        private Dictionary<string, byte[]>? _sessionData;
 
         [TestInitialize]
         public void Initialize()
@@ -31,11 +34,37 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
                 .Options;
 
             _context = new ApplicationDbContext(options);
+
+            // Mock Session
+            _sessionMock = new Mock<ISession>();
+            _sessionData = new Dictionary<string, byte[]>();
+
+            // Setup session Set method
+            _sessionMock.Setup(s => s.Set(It.IsAny<string>(), It.IsAny<byte[]>()))
+                       .Callback<string, byte[]>((key, value) => _sessionData[key] = value);
+
+            // Setup session TryGetValue method
+            _sessionMock.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+                       .Returns((string key, out byte[] value) =>
+                       {
+                           if (_sessionData.ContainsKey(key))
+                           {
+                               value = _sessionData[key];
+                               return true;
+                           }
+                           value = null;
+                           return false;
+                       });
+
             _controller = new AccountController(_context, _emailSenderMock.Object, _loggerMock.Object);
+
+            // Create HttpContext with mocked session
+            var httpContext = new DefaultHttpContext();
+            httpContext.Session = _sessionMock.Object;
 
             _controller.ControllerContext = new ControllerContext()
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = httpContext
             };
         }
 
@@ -49,17 +78,13 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
         [TestMethod]
         public void Register_GET_ReturnsView()
         {
-            // Act
             var result = _controller!.Register();
-
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
         [TestMethod]
         public async Task Register_POST_ValidModel_ReturnsActionResult()
         {
-            // Arrange
             var model = new RegisterViewModel
             {
                 FullName = "Test User",
@@ -70,17 +95,13 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
                 Role = "User"
             };
 
-            // Act
             var result = await _controller!.Register(model);
-
-            // Assert
             Assert.IsInstanceOfType(result, typeof(IActionResult));
         }
 
         [TestMethod]
         public async Task Register_POST_InvalidModel_ReturnsView()
         {
-            // Arrange
             var model = new RegisterViewModel
             {
                 FullName = "",
@@ -89,17 +110,13 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
                 ConfirmPassword = "456"
             };
 
-            // Act
             var result = await _controller!.Register(model);
-
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
         [TestMethod]
         public async Task Register_POST_DuplicateEmail_ReturnsError()
         {
-            // Arrange
             var existingUser = new User
             {
                 FullName = "Existing User",
@@ -120,10 +137,7 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
                 Role = "User"
             };
 
-            // Act
             var result = await _controller!.Register(model);
-
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
             Assert.IsTrue(_controller.ModelState.ErrorCount > 0);
         }
@@ -131,7 +145,6 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
         [TestMethod]
         public async Task Login_POST_ValidCredentials_ReturnsActionResult()
         {
-            // Arrange
             var user = new User
             {
                 FullName = "Test User",
@@ -149,36 +162,34 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
                 Password = "Test123!"
             };
 
-            // Act
             var result = await _controller!.Login(model);
-
-            // Assert
             Assert.IsInstanceOfType(result, typeof(IActionResult));
         }
 
         [TestMethod]
         public async Task Login_POST_InvalidCredentials_ReturnsView()
         {
-            // Arrange
             var model = new LoginViewModel
             {
                 Email = "nonexistent@example.com",
                 Password = "WrongPassword123!"
             };
 
-            // Act
             var result = await _controller!.Login(model);
-
-            // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
         }
 
         [TestMethod]
         public async Task TwoFactor_POST_ValidCode_ReturnsActionResult()
         {
-            // Arrange
+            // Arrange - Set session data first
+            var userId = 1;
+            var userIdBytes = BitConverter.GetBytes(userId);
+            _sessionData!["TwoFactorUserId"] = userIdBytes;
+
             var user = new User
             {
+                UserID = userId,
                 FullName = "Test User",
                 Email = "test@example.com",
                 Password = "hashed",
@@ -201,9 +212,14 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
         [TestMethod]
         public async Task TwoFactor_POST_InvalidCode_ReturnsView()
         {
-            // Arrange
+            // Arrange - Set session data first
+            var userId = 1;
+            var userIdBytes = BitConverter.GetBytes(userId);
+            _sessionData!["TwoFactorUserId"] = userIdBytes;
+
             var user = new User
             {
+                UserID = userId,
                 FullName = "Test User",
                 Email = "test@example.com",
                 Password = "hashed",
@@ -221,6 +237,21 @@ namespace GiftOfTheGiversFoundation.UnitTests.Controllers
 
             // Assert
             Assert.IsInstanceOfType(result, typeof(ViewResult));
+        }
+
+        [TestMethod]
+        public async Task TwoFactor_POST_NoSession_RedirectsToLogin()
+        {
+            // Arrange - Don't set session data
+            var model = new TwoFactorViewModel { Code = "123456" };
+
+            // Act
+            var result = await _controller!.TwoFactor(model);
+
+            // Assert - Should redirect to login when no session
+            Assert.IsInstanceOfType(result, typeof(RedirectToActionResult));
+            var redirectResult = (RedirectToActionResult)result;
+            Assert.AreEqual("Login", redirectResult.ActionName);
         }
     }
 }
